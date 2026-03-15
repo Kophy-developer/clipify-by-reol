@@ -62,6 +62,15 @@ No terminal or code required after the repo is on GitHub.
 
 Open your Vercel URL: you should see the app and it will call the backend on Render.
 
+**If you see "Request failed with status code 404" when you click Generate clip:**  
+The frontend is calling Vercel instead of your backend. You must set **`VITE_API_BASE_URL`** in Vercel to your **Render backend URL** (e.g. `https://clipify-api-xxxx.onrender.com` — no trailing slash), then **redeploy** the frontend (Deployments → ⋮ → Redeploy). Vite bakes env vars into the build, so a new deploy is required after changing them.
+
+**YouTube: "Sign in to confirm you're not a bot" / HTTP 400:**  
+YouTube often blocks server downloads. Set **`YT_DLP_COOKIES_PATH`** on Render to a path where a cookies file is available (e.g. upload a `cookies.txt` exported from your browser and set the env var to that path). See [yt-dlp FAQ on cookies](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp). Alternatively use **Upload file** with a video you already have.
+
+**Upload file: "No module named 'requests'":**  
+The backend image was built without the `requests` dependency. Redeploy the backend (e.g. push a commit or trigger a redeploy on Render) so it rebuilds with the updated `requirements.txt` that includes `requests`.
+
 ---
 
 ## Free Tier Limits (So You Stay Free or Under $5)

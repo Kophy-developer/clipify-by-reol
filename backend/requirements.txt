@@ -18,6 +18,7 @@ pydantic-settings==2.6.1
 python-dotenv==1.0.1
 httpx==0.28.1
 aiofiles==24.1.0
+requests>=2.28.0
 
 # Face detection for crop bias (use wheel to avoid building from source)
 opencv-python-headless==4.9.0.80

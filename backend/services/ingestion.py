@@ -58,15 +58,22 @@ def get_video_metadata(path: str) -> dict[str, Any]:
 
 
 def download_from_url(url: str, job_id: str) -> str:
-    """Download video from URL with yt-dlp. Returns path to local file."""
+    """Download video from URL with yt-dlp. Returns path to local file.
+    Uses cookies file if YT_DLP_COOKIES_PATH is set (helps with YouTube bot checks).
+    """
     out_path = settings.upload_dir / f"{job_id}.%(ext)s"
     cmd = [
         "yt-dlp",
         "--no-playlist",
         "-f", "best[ext=mp4]/best",
         "-o", str(out_path),
+        "--add-header", "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         url,
     ]
+    cookies_path = getattr(settings, "yt_dlp_cookies_path", "") or ""
+    if cookies_path and Path(cookies_path).exists():
+        cmd.insert(-1, "--cookies")
+        cmd.insert(-1, str(cookies_path))
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
         raise RuntimeError(f"yt-dlp failed: {result.stderr}")

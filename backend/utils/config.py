@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     # Job store: use Redis when set; else in-memory (single-worker only)
     use_redis_job_store: bool = True
 
+    # yt-dlp: optional path to cookies file for YouTube (avoids "Sign in to confirm you're not a bot")
+    yt_dlp_cookies_path: str = ""
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
