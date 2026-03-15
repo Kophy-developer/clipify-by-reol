@@ -1,0 +1,40 @@
+# Local dev: API + Redis + Celery worker. Run frontend separately (npm run dev).
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      UPLOAD_DIR: /tmp/clipify_uploads
+      OUTPUT_DIR: /tmp/clipify_output
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A celery_app worker -l info -c 1
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      UPLOAD_DIR: /tmp/clipify_uploads
+      OUTPUT_DIR: /tmp/clipify_output
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - api

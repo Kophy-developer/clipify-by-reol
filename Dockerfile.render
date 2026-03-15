@@ -1,0 +1,12 @@
+# Single container: API + Celery worker (for Render free tier).
+# In Render: set Root Directory to empty, Dockerfile path to Dockerfile.render.
+FROM python:3.11-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+COPY backend/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/ ./
+ENV PYTHONUNBUFFERED=1
+EXPOSE 8000
+# Run worker in background and API in foreground so the container stays up.
+CMD ["sh", "-c", "celery -A celery_app worker -l info -c 1 & exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
