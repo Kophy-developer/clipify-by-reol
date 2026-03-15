@@ -37,8 +37,11 @@ class Settings(BaseSettings):
     # Job store: use Redis when set; else in-memory (single-worker only)
     use_redis_job_store: bool = True
 
-    # yt-dlp: optional path to cookies file for YouTube (avoids "Sign in to confirm you're not a bot")
+    # yt-dlp: optional cookies for YouTube (avoids "Sign in to confirm you're not a bot")
+    # Set one of: path to file on server, or URL to download cookies from, or paste content in next var
     yt_dlp_cookies_path: str = ""
+    yt_dlp_cookies_url: str = ""
+    yt_dlp_cookies_content: str = ""
 
     class Config:
         env_file = ".env"

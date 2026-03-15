@@ -1,10 +1,44 @@
 """Video ingestion: URL download (yt-dlp) or use uploaded file. Validate format and length."""
 from __future__ import annotations
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any
 
 from utils.config import settings
+
+_cookies_file_path: str | None = None
+
+
+def _get_cookies_path() -> str | None:
+    global _cookies_file_path
+    if _cookies_file_path is not None:
+        return _cookies_file_path
+    path_cfg = getattr(settings, "yt_dlp_cookies_path", "") or ""
+    if path_cfg and Path(path_cfg).exists():
+        return path_cfg
+    url_cfg = getattr(settings, "yt_dlp_cookies_url", "") or ""
+    if url_cfg:
+        try:
+            import urllib.request
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as f:
+                with urllib.request.urlopen(url_cfg, timeout=15) as r:
+                    f.write(r.read().decode("utf-8", errors="replace"))
+                _cookies_file_path = f.name
+                return _cookies_file_path
+        except Exception:
+            pass
+    content_cfg = getattr(settings, "yt_dlp_cookies_content", "") or ""
+    if content_cfg.strip():
+        try:
+            fd, path = tempfile.mkstemp(suffix=".txt", text=True)
+            with open(fd, "w", encoding="utf-8") as f:
+                f.write(content_cfg)
+            _cookies_file_path = path
+            return _cookies_file_path
+        except Exception:
+            pass
+    return None
 
 
 def get_video_duration_seconds(path: str) -> float:
@@ -70,8 +104,8 @@ def download_from_url(url: str, job_id: str) -> str:
         "--add-header", "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         url,
     ]
-    cookies_path = getattr(settings, "yt_dlp_cookies_path", "") or ""
-    if cookies_path and Path(cookies_path).exists():
+    cookies_path = _get_cookies_path()
+    if cookies_path:
         cmd.insert(-1, "--cookies")
         cmd.insert(-1, str(cookies_path))
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)

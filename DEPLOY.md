@@ -66,7 +66,14 @@ Open your Vercel URL: you should see the app and it will call the backend on Ren
 The frontend is calling Vercel instead of your backend. You must set **`VITE_API_BASE_URL`** in Vercel to your **Render backend URL** (e.g. `https://clipify-api-xxxx.onrender.com` — no trailing slash), then **redeploy** the frontend (Deployments → ⋮ → Redeploy). Vite bakes env vars into the build, so a new deploy is required after changing them.
 
 **YouTube: "Sign in to confirm you're not a bot" / HTTP 400:**  
-YouTube often blocks server downloads. Set **`YT_DLP_COOKIES_PATH`** on Render to a path where a cookies file is available (e.g. upload a `cookies.txt` exported from your browser and set the env var to that path). See [yt-dlp FAQ on cookies](https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp). Alternatively use **Upload file** with a video you already have.
+Use one of these on Render (Environment tab):
+
+- **Easiest:** **`YT_DLP_COOKIES_CONTENT`** — Paste the **entire contents** of your `youtubecookies.txt` into this env var (Render allows multiline). No upload needed.
+- **Or a URL:** **`YT_DLP_COOKIES_URL`** — Host the cookies file somewhere that returns it as plain text, then set this to that URL. Options:
+  - **GitHub Gist (secret):** Create a new Gist at [gist.github.com](https://gist.github.com), set "Secret", upload or paste your `youtubecookies.txt`, then click "Raw" and copy the URL. Use that as `YT_DLP_COOKIES_URL`. (Anyone with the link can see the file, so prefer secret gist and don’t share the link.)
+  - **Other:** Any HTTPS URL that returns the cookies file (e.g. a private S3/R2 link, or a small paste service that supports raw output).
+
+Alternatively use **Upload file** with a video you already have.
 
 **Upload file: "No module named 'requests'":**  
 The backend image was built without the `requests` dependency. Redeploy the backend (e.g. push a commit or trigger a redeploy on Render) so it rebuilds with the updated `requirements.txt` that includes `requests`.
