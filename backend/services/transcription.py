@@ -21,8 +21,8 @@ def extract_audio(video_path: str, output_path: str) -> None:
 
 def transcribe_and_srt(audio_path: str, job_id: str) -> tuple[str, str]:
     """Transcribe audio with faster-whisper; return (transcript_text, srt_path)."""
-    from faster_whisper import Whisper
-    model = Whisper("base", device="cpu", compute_type="int8")
+    from faster_whisper import WhisperModel
+    model = WhisperModel("base", device="cpu", compute_type="int8")
     segments, info = model.transcribe(audio_path, word_timestamps=True)
 
     lines: list[str] = []
